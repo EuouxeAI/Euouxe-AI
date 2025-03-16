@@ -1,0 +1,200 @@
+# BRIM Network - Enterprise RBAC Policy Configuration
+# Version: 4.2.0
+# Compliance: ISO 27001, NIST 800-53
+
+# ---------------------------
+# Role Definitions
+# ---------------------------
+roles:
+  # Base system roles
+  system:
+    viewer:
+      description: "Read-only access to monitoring dashboards"
+      permissions: &base_view
+        - "metrics:read"
+        - "logs:read"
+    
+    operator:
+      description: "Basic system operations"
+      inherits: ["viewer"]
+      permissions:
+        - "agents:restart"
+        - "models:reload"
+        - "cache:flush"
+    
+    admin:
+      description: "Full system administration"
+      inherits: ["operator"]
+      permissions:
+        - "*:create"
+        - "*:update"
+        - "*:delete"
+        - "*:execute"
+      constraints:
+        session_timeout: 900  # 15min
+        mfa_required: true
+
+  # Data-specific roles  
+  data:
+    etl_developer:
+      description: "Create and modify ETL pipelines"
+      permissions:
+        - "pipelines:create"
+        - "pipelines:update"
+        - "schemas:validate"
+      resource_scopes:
+        - "department:data-engineering"
+    
+    data_steward:
+      description: "Manage sensitive data assets"
+      inherits: ["etl_developer"]
+      permissions:
+        - "data:mask"
+        - "data:anonymize"
+        - "gdpr:enforce"
+      constraints:
+        geolocation: ["EU"]
+        ip_range: ["192.168.100.0/24"]
+
+# ---------------------------
+# Permission Sets
+# ---------------------------
+permissions:
+  # Granular action patterns
+  actions:
+    - "metrics:read"
+    - "models:train"
+    - "models:deploy"
+    - "agents:create"
+    - "agents:delete"
+    - "data:export"
+  
+  # Dynamic permission groups  
+  dynamic_groups:
+    time_based:
+      - name: "business_hours_access"
+        permissions: ["agents:restart", "models:reload"]
+        condition: "time('09:00-17:00 UTC')"
+    
+    risk_based:
+      - name: "high_risk_operations"
+        permissions: ["*:delete", "data:export"]
+        requires:
+          - "approval:manager"
+          - "reason:documented"
+
+# ---------------------------
+# User Assignments
+# ---------------------------
+assignments:
+  users:
+    - user_id: "user-sre1"
+      roles: ["admin", "data_steward"]
+      expires: "2025-12-31"
+    
+    - user_id: "user-etl5"
+      roles: ["etl_developer"]
+      resource_scope: "project:finance-transform"
+
+  groups:
+    - name: "european_auditors"
+      roles: ["viewer"]
+      conditions:
+        - "attribute:country in ['DE','FR','IT']"
+        - "device:managed"
+
+# ---------------------------
+# Audit & Compliance
+# ---------------------------
+audit:
+  enabled: true
+  retention_days: 365
+  sensitive_actions:
+    - "*:delete"
+    - "data:export"
+    - "models:deploy"
+  
+  alert_rules:
+    - name: "privilege_escalation"
+      condition: "role_changes within 1h"
+      severity: "critical"
+    
+    - name: "after_hours_admin"
+      condition: "admin_role_access && !time('09:00-17:00')"
+      severity: "high"
+
+# ---------------------------
+# Advanced Policy Controls
+# ---------------------------
+policies:
+  # Separation of Duties
+  sod_rules:
+    - name: "model_training_vs_deployment"
+      conflicting_roles: ["models:train", "models:deploy"]
+    
+    - name: "data_management"
+      conflicting_permissions: ["data:mask", "data:export"]
+
+  # Attribute-based access
+  abac_rules:
+    - name: "temporary_contractors"
+      effect: "deny"
+      condition: |
+        user.employment_type == 'contractor' && 
+        resource.classification == 'confidential'
+    
+    - name: "production_access"
+      effect: "allow"
+      condition: |
+        user.department == 'ai-ops' &&
+        environment.tier == 'production'
+
+# ---------------------------
+# Multi-Tenant Configuration
+# ---------------------------
+tenancy:
+  enabled: true
+  isolation_level: "hard"  # [hard|soft]
+  shared_components:
+    - "monitoring"
+    - "audit"
+  
+  tenant_override_policies:
+    - path: "/tenants/{tenant_id}/policies/*"
+      priority: 100
+
+# ---------------------------
+# Security Parameters
+# ---------------------------
+security:
+  session:
+    idle_timeout: 1800  # 30min
+    absolute_timeout: 43200  # 12h
+    renewal_interval: 300
+    
+  password:
+    min_length: 12
+    history_size: 5
+    complexity_rules:
+      - "uppercase:1"
+      - "digits:2"
+      - "special:1"
+
+# ---------------------------
+# External Integrations
+# ---------------------------
+integrations:
+  auth_providers:
+    azure_ad:
+      group_sync:
+        enabled: true
+        mapping:
+          "AD_AI_Admins": ["admin"]
+          "AD_DataTeam": ["etl_developer"]
+    
+    okta:
+      scim_enabled: true
+  
+  secrets:
+    encryption_key: "env://RBAC_ENCRYPT_KEY"
+    token_signing_key: "vault:brim/rbac/signing-key"
