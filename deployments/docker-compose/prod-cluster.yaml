@@ -1,0 +1,49 @@
+version: '3.8'
+
+x-logging: &default-logging
+  driver: "gelf"
+  options:
+    gelf-address: "udp://log-aggregator:12201"
+    tag: "brim-{{.Name}}"
+
+services:
+  brim-agent:
+    image: brimnetwork/agent:3.4.0
+    deploy:
+      replicas: 5
+      update_config:
+        parallelism: 2
+        delay: 10s
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    environment:
+      - BRIM_ENV=production
+      - REDIS_URL=redis://brim-redis:6379/0
+    logging: *default-logging
+    networks:
+      - brim-backend
+
+  brim-redis:
+    image: redis:7.0-alpine
+    command: ["redis-server", "--appendonly yes"]
+    volumes:
+      - redis-data:/data
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    logging: *default-logging
+
+networks:
+  brim-backend:
+    driver: overlay
+    encrypted: true
+
+volumes:
+  redis-data:
+    driver: aws-ebs
+    driver_opts:
+      size: "50GB"
+      volume-type: "gp3"
