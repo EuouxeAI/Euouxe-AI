@@ -1,0 +1,154 @@
+name: Build, Test, and Security Scan
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  PYTHON_VERSION: "3.9"
+  POETRY_VERSION: "1.7.0"
+
+jobs:
+  build-and-test:
+    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.8", "3.9", "3.10"]
+        exclude:
+          - os: macos-latest
+            python-version: "3.8"
+          - os: windows-latest
+            python-version: "3.10"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+        submodules: recursive
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'poetry'
+
+    - name: Install system dependencies (Ubuntu only)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libssl-dev redis-server
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Configure Poetry
+      run: |
+        poetry config virtualenvs.in-project true
+        poetry config virtualenvs.create true
+
+    - name: Install dependencies
+      run: |
+        poetry install --no-root --with dev,test,security --sync
+
+    - name: Run unit tests with pytest
+      run: |
+        poetry run pytest tests/unit/ \
+          --junitxml=junit/test-results.xml \
+          --cov=src \
+          --cov-report=xml:coverage.xml \
+          --cov-report=html
+
+    - name: Run integration tests
+      timeout-minutes: 15
+      env:
+        REDIS_URL: "redis://localhost:6379"
+        GRPC_PORT: "50051"
+      run: |
+        poetry run pytest tests/integration/ \
+          --junitxml=junit/integration-results.xml
+
+    - name: Code quality checks
+      run: |
+        poetry run black --check --diff src/ tests/
+        poetry run flake8 src/ tests/ --max-line-length=120
+        poetry run mypy src/
+
+    - name: Security scanning
+      run: |
+        poetry run bandit -r src/ -ll
+        poetry run safety check --full-report
+        # TruffleHog secret scan
+        docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:latest \
+          github --repo https://github.com/$GITHUB_REPOSITORY --only-verified
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: coverage.xml
+        flags: unittests
+
+    - name: SonarCloud analysis
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: Build Docker image
+      if: github.ref == 'refs/heads/main'
+      run: |
+        docker build -t brimnetwork/core:latest \
+          --build-arg PYTHON_VERSION=${{ matrix.python-version }} \
+          --file deployments/docker/Dockerfile .
+
+    - name: Push to Docker Hub
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+        docker push brimnetwork/core:latest
+
+    - name: Archive test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports
+        path: |
+          junit/*.xml
+          coverage.xml
+
+    - name: Slack notification
+      if: always()
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_CI_WEBHOOK }}
+        SLACK_COLOR: ${{ job.status == 'success' && '#36a64f' || '#ff0000' }}
+        SLACK_MESSAGE: "Build ${{ job.status }}: ${{ github.workflow }} #${{ github.run_number }}"
+
+  dependency-audit:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+    - name: Run OSS Audit
+      run: |
+        pip install pip-audit
+        pip-audit --desc --ignore-vuln GHSA-xxxx-xxxx-xxxx
+
+  compliance-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Check licenses
+      uses: fossas/fossa-action@v2
+      with:
+        api-key: ${{ secrets.FOSSA_API_KEY }}
