@@ -1,0 +1,151 @@
+# BRIM Network - Development Environment Stack (v4.2.0)
+# Full-stack local development with enterprise security practices
+
+version: '3.8'
+
+x-common-env: &common-env
+  TZ: "UTC"
+  LOG_LEVEL: "DEBUG"
+  SSL_ENABLED: "true"
+  VAULT_ADDR: "http://vault:8200"
+
+services:
+  # Core AI Services
+  brim-agent:
+    image: brimnetwork/agent:4.2.0-dev
+    environment:
+      <<: *common-env
+      KAFKA_BROKERS: "kafka:9093"
+      REDIS_URL: "rediss://redis:6379"
+      DB_URL: "postgresql://brim_dev:${DEV_DB_PASSWORD}@postgres/brim_dev?sslmode=verify-full"
+    volumes:
+      - ./certs:/etc/ssl/certs:ro
+      - ./config/dev/agent:/app/config
+    ports:
+      - "50051:50051"
+      - "9090:9090" # Metrics
+    healthcheck:
+      test: ["CMD", "curl", "-fsk", "https://localhost:9090/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Data Infrastructure
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: "brim_dev"
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: "brim_dev"
+      PGSSLKEY: "/etc/ssl/certs/postgres-client.key"
+      PGSSLCERT: "/etc/ssl/certs/postgres-client.crt"
+      PGSSLROOTCERT: "/etc/ssl/certs/ca.crt"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./certs:/etc/ssl/certs:ro
+    secrets:
+      - db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brim_dev"]
+      interval: 5s
+
+  redis:
+    image: redis/redis-stack-server:7.2.0-v6
+    command: ["--tls-port 6379", "--port 0", "--requirepass ${REDIS_PASSWORD}"]
+    environment:
+      REDIS_PASSWORD_FILE: /run/secrets/redis_password
+    volumes:
+      - redis_data:/data
+      - ./certs:/tls:ro
+    secrets:
+      - redis_password
+    healthcheck:
+      test: ["CMD", "redis-cli", "--tls", "-a", "$$REDIS_PASSWORD", "ping"]
+
+  kafka:
+    image: bitnami/kafka:3.6
+    environment:
+      KAFKA_CFG_LISTENERS: "SSL://:9093"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "SSL://kafka:9093"
+      KAFKA_CFG_SSL_KEYSTORE_LOCATION: "/etc/kafka/secrets/server.keystore.jks"
+      KAFKA_CFG_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/server.truststore.jks"
+      KAFKA_CFG_SSL_KEYSTORE_PASSWORD_FILE: "/run/secrets/kafka_keystore_pass"
+      KAFKA_CFG_SSL_TRUSTSTORE_PASSWORD_FILE: "/run/secrets/kafka_truststore_pass"
+    volumes:
+      - kafka_data:/bitnami/kafka
+      - ./certs/kafka:/etc/kafka/secrets:ro
+    secrets:
+      - kafka_keystore_pass
+      - kafka_truststore_pass
+
+  # Monitoring & Security
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-lifecycle"
+      - "--storage.tsdb.retention.time=7d"
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus
+      - prom_data:/prometheus
+    ports:
+      - "9091:9090"
+
+  grafana:
+    image: grafana/grafana-enterprise:10.1.5
+    environment:
+      GF_SERVER_PROTOCOL: "https"
+      GF_SERVER_CERT_FILE: "/etc/ssl/certs/grafana.crt"
+      GF_SERVER_CERT_KEY: "/etc/ssl/certs/grafana.key"
+    volumes:
+      - ./monitoring/grafana:/var/lib/grafana
+      - ./certs:/etc/ssl/certs:ro
+    ports:
+      - "3000:3000"
+
+  vault:
+    image: vault:1.15
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - vault_data:/vault/file
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "brim-dev-token"
+      VAULT_LOCAL_CONFIG: '{
+        "listener": {"tcp": {"address": "0.0.0.0:8200", "tls_disable": true}},
+        "storage": {"file": {"path": "/vault/file"}},
+        "default_lease_ttl": "168h",
+        "max_lease_ttl": "720h"
+      }'
+    ports:
+      - "8200:8200"
+
+# Infrastructure Configuration
+volumes:
+  pg_data:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  redis_data:
+  kafka_data:
+  prom_data:
+  vault_data:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  redis_password:
+    file: ./secrets/redis_password.txt  
+  kafka_keystore_pass:
+    file: ./secrets/kafka_keystore_pass.txt
+  kafka_truststore_pass:
+    file: ./secrets/kafka_truststore_pass.txt
+
+networks:
+  default:
+    driver: bridge
+    name: brim-dev-net
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
