@@ -1,0 +1,171 @@
+# BRIM Network - AI Agent Service Deployment (v3.4.0)
+# Designed for Kubernetes 1.25+ with PCI-DSS/SOC2 compliance
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brim-agent
+  namespace: brim-production
+  labels:
+    app.kubernetes.io/component: ai-agent
+    app.kubernetes.io/part-of: brim-network
+spec:
+  replicas: 5
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 10%
+  selector:
+    matchLabels:
+      ai.brim.network/role: inference-engine
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+        vault.security/role: "brim-agent"
+      labels:
+        ai.brim.network/role: inference-engine
+        ai.brim.network/version: "3.4.0"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 20001
+        seccompProfile:
+          type: RuntimeDefault
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: ai.brim.network/role
+                  operator: In
+                  values: ["inference-engine"]
+              topologyKey: "kubernetes.io/hostname"
+      nodeSelector:
+        node-type: ai-optimized
+      tolerations:
+      - key: "dedicated"
+        operator: "Equal"
+        value: "ai-workloads"
+        effect: "NoSchedule"
+      containers:
+      - name: agent-core
+        image: brimnetwork/agent:3.4.0@sha256:a1b2c3d4e5f67890
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 50051
+          name: grpc
+        - containerPort: 8080
+          name: http-metrics
+        envFrom:
+        - configMapRef:
+            name: brim-agent-config
+        - secretRef:
+            name: brim-agent-secrets
+        resources:
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+            nvidia.com/gpu: 1
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        volumeMounts:
+        - name: model-store
+          mountPath: /opt/brim/models
+          readOnly: true
+        - name: tmpfs
+          mountPath: /tmp
+      volumes:
+      - name: model-store
+        persistentVolumeClaim:
+          claimName: brim-model-pvc
+      - name: tmpfs
+        emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi
+      imagePullSecrets:
+      - name: brim-registry-creds
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: brim-agent-autoscaler
+  namespace: brim-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: brim-agent
+  minReplicas: 3
+  maxReplicas: 15
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 300
+      stabilizationWindowSeconds: 600
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: brim-agent-service
+  namespace: brim-production
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-west-2:123456789012:certificate/a1b2c3d4-5678-90ab-cdef-1234567890ab"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+spec:
+  selector:
+    ai.brim.network/role: inference-engine
+  ports:
+  - name: grpc-tls
+    port: 443
+    targetPort: 50051
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 8080
+    protocol: TCP
+  type: LoadBalancer
+  sessionAffinity: ClientIP
+  loadBalancerSourceRanges:
+  - 192.168.0.0/16
+  - 10.0.0.0/8
