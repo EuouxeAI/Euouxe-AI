@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# BRIM Network - Enterprise Certificate Authority Management Script
+# Euouxe AI - Enterprise Certificate Authority Management Script
 # Features:
 #   - Multi-level PKI (Root/Intermediate/Issuing CA)
 #   - OCSP & CRL auto-generation
