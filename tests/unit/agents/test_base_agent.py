@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Base Agent Test Suite (v4.2.0)
+Euouxe AI - Enterprise Base Agent Test Suite (v4.2.0)
 Comprehensive validation of core agent functionality with security, resilience, and observability tests
 """
 
