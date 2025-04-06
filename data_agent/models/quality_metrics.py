@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Data Quality Monitoring System
+Euouxe AI - Enterprise Data Quality Monitoring System
 Implements real-time quality metrics computation, rule validation, and observability integration
 """
 
