@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Cache Management Test Suite
+Euouxe AI - Enterprise Cache Management Test Suite
 Validates in-memory/Redis caching, encrypted storage, and failover scenarios
 """
 
