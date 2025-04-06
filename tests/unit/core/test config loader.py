@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Configuration Loader Test Suite
+Euouxe AI - Enterprise Configuration Loader Test Suite
 Validates encrypted config handling, hot-reloading, and multi-source merging
 """
 
