@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Data Schema Manager
+Euouxe AI - Enterprise Data Schema Manager
 Defines strongly-typed data schemas with validation, encryption, and cross-system compatibility
 """
 
