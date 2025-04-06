@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise AI Client SDK
+Euouxe AI - Enterprise AI Client SDK
 Implements secure, resilient communication with BRIM servers and agent clusters
 """
 
