@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Data Quality Engine
+Euouxe AI - Enterprise Data Quality Engine
 Performs schema validation, statistical profiling, and anomaly detection
 """
 
