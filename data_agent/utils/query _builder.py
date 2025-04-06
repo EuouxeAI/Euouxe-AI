@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Query Builder
+Euouxe AI - Enterprise Query Builder
 Implements secure, database-agnostic query construction with SQL injection protection
 """
 
