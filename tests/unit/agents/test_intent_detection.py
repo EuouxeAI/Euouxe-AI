@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Intent Detection Test Suite
+Euouxe AI - Enterprise Intent Detection Test Suite
 Validates NLP pipeline, multilingual support, and adversarial input handling
 """
 
