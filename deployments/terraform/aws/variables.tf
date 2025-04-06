@@ -1,4 +1,4 @@
-# BRIM Network - Enterprise Infrastructure Variables
+# Euouxe AI - Enterprise Infrastructure Variables
 # Supports AWS, Azure, GCP with security hardening and compliance
 
 # ========================
