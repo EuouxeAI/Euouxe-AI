@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Cryptographic Engine
+Euouxe AI - Enterprise Cryptographic Engine
 Implements FIPS 140-2 compliant encryption with key management and audit logging
 """
 
