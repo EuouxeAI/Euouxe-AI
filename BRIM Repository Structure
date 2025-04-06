@@ -1,4 +1,4 @@
-BRIM-Network/
+Euouxe-AI/
 ├── .github/                   # GitHub-specific configurations
 │   ├── workflows/             # CI/CD pipelines
 │   │   ├── build-and-test.yml # Unit/Integration tests on PR
