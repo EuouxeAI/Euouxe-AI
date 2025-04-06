@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: brim-network-grafana-dashboards
-  namespace: brim-monitoring
+  name: euouxe-ai-grafana-dashboards
+  namespace: euouxe-monitoring
   labels:
     grafana_dashboard: "1"
-    app: brim-network
+    app: euouxe-ai
     tier: observability
 annotations:
   grafana-folder: /Enterprise Monitoring/BRIM Network
