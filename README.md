@@ -1,4 +1,4 @@
-# BRIM Network - Enterprise-Grade Multi-Agent Framework
+# Euouxe AI - Enterprise-Grade Multi-Agent Framework
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-brightgreen)](https://www.python.org/)
