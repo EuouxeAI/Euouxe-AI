@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise JWT Management System
+Euouxe AI - Enterprise JWT Management System
 Implements FIPS-compliant token handling with refresh/revocation and claim encryption
 """
 
