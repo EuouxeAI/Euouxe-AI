@@ -1,5 +1,5 @@
 """
-BRIM Network - Evolutionary Optimization Engine
+Euouxe AI - Evolutionary Optimization Engine
 Enterprise-grade genetic algorithm implementation with multi-population support
 """
 
