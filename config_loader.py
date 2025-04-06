@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Configuration Management
+Euouxe AI - Enterprise Configuration Management
 Secure configuration loader with encryption, validation, and dynamic reloading
 """
 
