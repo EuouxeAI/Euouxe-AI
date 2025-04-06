@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Cache Management System
+Euouxe AI - Enterprise Cache Management System
 Implements memory/distributed caching with encryption, TTL policies, and observability
 """
 
