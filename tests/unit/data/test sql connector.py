@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise SQL Connector Test Suite
+Euouxe AI - Enterprise SQL Connector Test Suite
 Validates multi-database support, connection pooling, and security controls
 """
 
