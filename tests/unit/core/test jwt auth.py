@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise JWT Authentication Test Suite
+Euouxe AI - Enterprise JWT Authentication Test Suite
 Validates token lifecycle, key rotation, and security hardening controls
 """
 
