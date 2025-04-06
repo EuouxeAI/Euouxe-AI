@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise AI Agent Server
+Euouxe AI - Enterprise AI Agent Server
 Combines gRPC and REST APIs with advanced security, observability, and cluster coordination
 """
 
