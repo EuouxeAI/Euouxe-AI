@@ -1,5 +1,5 @@
 """
-BRIM Network - Federated Learning Aggregator (Enterprise Edition)
+Euouxe AI - Federated Learning Aggregator (Enterprise Edition)
 Implements secure model aggregation with privacy preservation and audit capabilities
 """
 
