@@ -7,19 +7,18 @@
 
 **Next-Generation Enterprise AI Infrastructure for Secure, Scalable, and Governable Multi-Agent Systems**
 
-[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/BRIMAGENT)
-[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/NateHerman123)
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/Euouxecloud)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/nathaniel-herman)
 
 
-<a href="https://brimai.network/" target="_blank">View Official Website</a>
+<a href="https://euouxeai.cloud/" target="_blank">View Official Website</a>
 
 
 ---
 
 ## 📌 Overview
 
-BRIM Network is an enterprise-grade framework for building **secure**, **observable**, and **compliant** multi-agent AI systems. Designed for mission-critical deployments, it combines:
+Euouxe AI is an enterprise-grade framework for building **secure**, **observable**, and **compliant** multi-agent AI systems. Designed for mission-critical deployments, it combines:
 
 - 🔐 Zero-trust security architecture
 - 🌐 Cross-industry interoperability
@@ -30,7 +29,7 @@ BRIM Network is an enterprise-grade framework for building **secure**, **observa
 
 ---
 
-## BRIM Architecture
+## Euouxe AI Architecture
 ```mermaid
 graph TD
     A[Client Apps] -->|HTTPS/2| B(API Gateway)
@@ -65,7 +64,7 @@ graph TD
 
 ### **Advanced Agent Capabilities**
 ```python
-class BrimAgent:
+class EuouxeAI:
     def __init__(self):
         self.security_context = ZeroTrustContext()  # FIPS-validated
         self.knowledge_graph = OntologyDrivenKG()   # Industry-specific
@@ -77,26 +76,26 @@ class BrimAgent:
 ### Prerequisites
 ```
 # Core Dependencies
-conda create -n brim python=3.10
-conda activate brim
-pip install "brim-core[enterprise]==1.0.0"
+conda create -n euouxe python=3.10
+conda activate euouxe
+pip install "euouxe-core[enterprise]==1.0.0"
 
 # GPU Acceleration (Optional)
-pip install "brim-core[gpu]==1.0.0"
+pip install "euouxe-core[gpu]==1.0.0"
 ```
 
 ### Configuration
 ```
-# config/brim.yaml
+# config/euouxe.yaml
 security:
   tls:
-    cert: /etc/brim/certs/server.crt
-    key: /etc/brim/certs/server.key
+    cert: /etc/euouxe/certs/server.crt
+    key: /etc/euouxe/certs/server.key
 
 monitoring:
   prometheus:
     port: 9090
-    metrics_path: /brim-metrics
+    metrics_path: /euouxe-metrics
 ```
 
 ## Production Deployment Topology
@@ -139,10 +138,10 @@ graph TD
 ### Quick Start
 ```
 # Start Local Cluster
-brim-cluster start --nodes 3 --tls auto
+euouxe-cluster start --nodes 3 --tls auto
 
 # Deploy Sample Agent
-brim-agent deploy examples/sentiment_analysis \
+euouxe-agent deploy examples/sentiment_analysis \
   --security-profile=hipaa \
   --resource-limit="cpu=2,mem=4gb"
 ```
@@ -151,7 +150,7 @@ brim-agent deploy examples/sentiment_analysis \
 
 ### 1. Secure Multi-Agent Collaboration
 ```
-from brim_core import SecureOrchestrator
+from euouxe_core import SecureOrchestrator
 
 orchestrator = SecureOrchestrator(
     policy="gdpr_compliance_v3",
@@ -199,10 +198,10 @@ brim fl-init --schema healthcare --participants hospital1,hospital2,hospital3 \
 
 ### Key Metrics
 ```
-# BRIM-specific Metrics
-brim_agent_tasks_completed{status="success"} 5421
-brim_model_accuracy{model="fraud_detection_v4"} 0.983
-brim_api_latency_seconds{quantile="0.99"} 0.423
+# euouxe-specific Metrics
+euouxe_agent_tasks_completed{status="success"} 5421
+euouxe_model_accuracy{model="fraud_detection_v4"} 0.983
+euouxe_api_latency_seconds{quantile="0.99"} 0.423
 ```
 
 ### SLA Management
@@ -224,16 +223,16 @@ brim_api_latency_seconds{quantile="0.99"} 0.423
 ### Cloud Providers
 ```
 # AWS
-brim-cloud deploy aws --profile enterprise-prod --region eu-west-1
+euouxe-cloud deploy aws --profile enterprise-prod --region eu-west-1
 
 # Azure
-brim-cloud deploy azure --tier mission-critical --compliance hipaa
+euouxe-cloud deploy azure --tier mission-critical --compliance hipaa
 ```
 
 ### On-Premises
 
 ```
-brim-cluster init --topology ha \
+euouxe-cluster init --topology ha \
   --security fips-140-3 \
   --storage ceph \
   --network calico
@@ -242,7 +241,7 @@ brim-cluster init --topology ha \
 ## 🤝 Contributing
 ### Development Setup
 ```
-git clone https://github.com/brim-network/core.git
+git clone https://github.com/euouxe-ai/core.git
 cd core
 make install-dev
 make gen-protobuf  # Generate gRPC interfaces
