@@ -1,5 +1,5 @@
 """
-BRIM Network - Core System Entry Point
+Euouxe AI - Core System Entry Point
 Enterprise-grade main module with service orchestration, failure resilience, and observability
 """
 
