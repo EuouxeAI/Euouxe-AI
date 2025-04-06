@@ -1,5 +1,5 @@
 """
-BRIM Network - Entity Recognition Agent
+Euouxe AI - Entity Recognition Agent
 Enterprise-grade named entity recognition with contextual linking and model version control.
 """
 
