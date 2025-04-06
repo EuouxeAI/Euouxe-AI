@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Reinforcement Learning Agent
+Euouxe AI - Enterprise Reinforcement Learning Agent
 Implements distributed Proximal Policy Optimization (PPO) with federated experience collection
 """
 
