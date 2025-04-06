@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: brim-frontend
+  name: Euouxe-frontend
   labels:
-    app.kubernetes.io/part-of: brim-network
+    app.kubernetes.io/part-of: Euouxe-AI
 spec:
   replicas: 3
   strategy:
