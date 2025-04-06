@@ -1,5 +1,5 @@
 """
-BRIM Network - Base Agent Class
+Euouxe AI - Base Agent Class
 Defines the abstract foundation for all AI agents in the framework.
 """
 
