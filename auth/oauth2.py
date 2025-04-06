@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise OAuth 2.1 & OpenID Connect Provider
+Euouxe AI - Enterprise OAuth 2.1 & OpenID Connect Provider
 Implements RFC 6749/8252/7636 with FIPS-compliant security and monitoring
 """
 
