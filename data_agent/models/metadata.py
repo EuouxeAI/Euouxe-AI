@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Metadata Management Engine
+Euouxe AI - Enterprise Metadata Management Engine
 Handles metadata version control, audit logging, dependency graphs, and system interoperability
 """
 
