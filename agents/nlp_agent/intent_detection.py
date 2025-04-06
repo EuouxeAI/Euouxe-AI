@@ -1,5 +1,5 @@
 """
-BRIM Network - Intent Detection Agent
+Euouxe AI - Intent Detection Agent
 Handles natural language intent classification with model management and audit logging.
 """
 
