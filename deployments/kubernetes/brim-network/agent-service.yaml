@@ -1,14 +1,14 @@
-# BRIM Network - AI Agent Service Deployment (v3.4.0)
+# Euouxe AI - AI Agent Service Deployment (v3.4.0)
 # Designed for Kubernetes 1.25+ with PCI-DSS/SOC2 compliance
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: brim-agent
-  namespace: brim-production
+  name: Euouxe-AI
+  namespace: Euouxe-production
   labels:
     app.kubernetes.io/component: ai-agent
-    app.kubernetes.io/part-of: brim-network
+    app.kubernetes.io/part-of: Euouxe-AI
 spec:
   replicas: 5
   revisionHistoryLimit: 3
