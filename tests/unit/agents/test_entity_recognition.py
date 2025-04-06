@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Entity Recognition Test Suite
+Euouxe AI - Enterprise Entity Recognition Test Suite
 Validates multi-model NER pipeline, PII detection, and cross-language entity resolution
 """
 
