@@ -1,5 +1,5 @@
 """
-BRIM Network - Enterprise Database Migration Engine
+Euouxe AI - Enterprise Database Migration Engine
 Supports PostgreSQL/MySQL/MongoDB with atomic execution, rollback, and observability
 """
 
